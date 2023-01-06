@@ -40,3 +40,4 @@ code "03-providers.ps1"
 code "04-modules.ps1"
 
 # 6. random / useful stuff
+code "05-random.ps1"

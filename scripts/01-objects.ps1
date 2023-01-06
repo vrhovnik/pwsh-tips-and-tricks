@@ -16,12 +16,17 @@ $data.Split("::")[1]
 $home
 $data.Split("::")[1] | Set-Location
 
-# example with speech object
-Add-Type -AssemblyName System.speech
-$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$speak.Speak("Hello, objects and .NET rules")
+# multiple variables - how to get multiple values from directory
+# get folder numbers, get all of the files and lentgth of all files all together
+$directories,$files = Get-ChildItem -Force -Recurse | Measure-Object -Sum PSIsContainer, Length -ErrorAction Ignore
+$directories,$files
 
-#example with links and images
+#example with web pages links and images
+Invoke-WebRequest wttr.in
+# show ascii art as it should be in terminal
+Invoke-WebRequest wttr.in | Select-Object -ExpandProperty Content
+Invoke-WebRequest cheat.sh/pwsh | Select-Object -ExpandProperty Content
+
 Start-Process "https://go.azuredemos.net/caf-tools"
 Invoke-WebRequest -Uri "https://go.azuredemos.net/caf" -OutVariable site
 $site.Links | ForEach-Object {$_."data-linktype"}
@@ -31,6 +36,10 @@ Invoke-WebRequest -Uri "https://www.bing.com/images/search?q=powershell" -OutVar
 $site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line
 Start-Process -Path ($site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line)
 
-# example using Win 32 API
-& ".\01-objects-MaximizeWindow.ps1"
+# example with speech object
+Add-Type -AssemblyName System.speech
+$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$speak.Speak("Öbjects and .NET rules")
 
+# example native windows commands - Win 32 API
+& ".\01-objects-MaximizeWindow.ps1"
