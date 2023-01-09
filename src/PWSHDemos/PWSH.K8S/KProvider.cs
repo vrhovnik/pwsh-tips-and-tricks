@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Diagnostics.Eventing.Reader;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using k8s;
@@ -6,63 +6,147 @@ using k8s;
 namespace PWSH.K8S;
 
 [CmdletProvider("KMan", ProviderCapabilities.None)]
-public class KProvider : NavigationCmdletProvider
+public class KProvider : ItemCmdletProvider
 {
-    private readonly IKubernetes kubernetesClient;
-
-    public KProvider()
+    protected override PSDriveInfo NewDrive(PSDriveInfo drive)
     {
+        if (drive == null)
+        {
+            WriteError(new ErrorRecord(new ArgumentNullException(nameof(drive)),
+                "NullDrive", ErrorCategory.InvalidArgument, null));
+            return null;
+        }
+
+        // check if drive root is not null or empty
+        // and if its an existing file
+        if (string.IsNullOrEmpty(drive.Root) || (File.Exists(drive.Root) == false))
+        {
+            WriteError(new ErrorRecord(new ArgumentException("drive.Root"), "NoRoot",
+                ErrorCategory.InvalidArgument, drive));
+            return null;
+        }
+
+        // create a new drive and create connection to kubernetes cluster
+        var kubernetesPsDrive = new KDriveInfo(drive);
         var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
-        kubernetesClient = new Kubernetes(config);
-    }
-
-    private readonly char[] pathSeparators = { '/', '\\' };
-
-    protected override bool IsValidPath(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return false;
-
-        return true;
-    }
+        kubernetesPsDrive.KubernetesInstance = new Kubernetes(config);
+        return kubernetesPsDrive;
+    } // NewDrive
 
     protected override void GetItem(string path)
     {
-        var allElts = path.Split(pathSeparators);
+        var kDriveInfo = PSDriveInfo as KDriveInfo;
+        if (path.PathIsDrive(PSDriveInfo))
+        {
+            var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
+            WriteItemObject(namespaceList.Items, path, true);
+            return;
+        } // if (PathIsDrive...
 
-        if (allElts.Length > 1) return;
+        var type = GetNamesFromPath(path, out var namespaceName, out var podName);
 
-        // var list = kubernetesClient.CoreV1.ListNamespacedPod(allElts[0]);
-        // WriteItemObject(list.Items, path, false);
-        WriteItemObject(path, path, false);
+        if (type == PathTypes.Namespace)
+        {
+            var podList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
+            WriteItemObject(podList, path, true);
+        }
+        else if (type == PathTypes.Pod)
+        {
+            var podList = kDriveInfo.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
+            WriteItemObject(podList.Spec, path, false);
+        }
+        else
+            throw new ArgumentException("Data was not read clearly");
     }
 
-    protected override void GetChildItems(string path, bool recurse)
+    /// <summary>
+    /// Test to see if the specified item exists.
+    /// </summary>
+    /// <param name="path">The path to the item to verify.</param>
+    /// <returns>True if the item is found.</returns>
+    protected override bool ItemExists(string path)
     {
-        WriteItemObject(path, path, true);
-        // var list = kubernetesClient.CoreV1.ListNamespacedPod(path);
-        // WriteItemObject(list.Items, path, true);
-    }
+        // check if the path represented is a drive
+        if (path.PathIsDrive(PSDriveInfo)) return true;
 
-    protected override bool HasChildItems(string path)
+        // Obtain type, namespace name and podname from path
+        var type = GetNamesFromPath(path, out var namespaceName, out var podname);
+
+        return type switch
+        {
+            PathTypes.Pod => !string.IsNullOrEmpty(namespaceName) && !string.IsNullOrEmpty(podname),
+            PathTypes.Namespace => !string.IsNullOrEmpty(namespaceName),
+            _ => false
+        };
+    } // ItemExists
+
+    /// <summary>
+    /// Chunks the path and returns the table name and the row number 
+    /// from the path
+    /// </summary>
+    /// <param name="path">Path to chunk and obtain information</param>
+    /// <param name="namespaceName">Name of the table as represented in the 
+    /// path</param>
+    /// <param name="podName">Row number obtained from the path</param>
+    /// <returns>what the path represents</returns>
+    private PathTypes GetNamesFromPath(string path, out string namespaceName, out string podName)
     {
-        return true;
-//        if (path.Length == 0) return true;
+        var retVal = PathTypes.Invalid;
+        namespaceName = "default";
+        podName = string.Empty;
 
-        // var list = kubernetesClient.CoreV1.ListNamespacedPod(path);
-        //
-        // return list.Items.Count > 0;
-    }
+        // Check if the path specified is a drive
+        if (path.PathIsDrive(PSDriveInfo)) return PathTypes.Cluster;
 
-    protected override Collection<PSDriveInfo> InitializeDefaultDrives()
+        // chunk the path into parts
+        var pathChunks = path.ChunkPath(PSDriveInfo);
+
+        switch (pathChunks.Length)
+        {
+            case 1:
+            {
+                var name = pathChunks[0];
+                namespaceName = name;
+                retVal = PathTypes.Namespace;
+                break;
+            }
+            case 2:
+            {
+                var name = pathChunks[0];
+                namespaceName = name;
+                podName = pathChunks[1];
+                retVal = PathTypes.Pod;
+                break;
+            }
+            default:
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("The path supplied has too many segments"),
+                    "PathNotValid",
+                    ErrorCategory.InvalidArgument,
+                    path));
+                break;
+            }
+        } // switch(pathChunks...
+
+        return retVal;
+    } // GetNamesFromPath
+
+    protected override bool IsValidPath(string path)
     {
-        PSDriveInfo drive = new(
-            name: "KMan",
-            provider: ProviderInfo,
-            root: @"\",
-            "get pods in specific namespaces",
-            credential: null);
+        var result = !string.IsNullOrEmpty(path);
 
-        Collection<PSDriveInfo> drives = new() { drive };
-        return drives;
+        // convert all separators in the path to a uniform one
+        path = path.NormalizePath();
+
+        // split the path into individual chunks
+        var pathChunks = path.Split(KProviderHelpers.PathSeparator.ToCharArray());
+
+        foreach (var pathChunk in pathChunks)
+        {
+            if (pathChunk.Length == 0) result = false;
+        }
+
+        return result;
     }
 }
