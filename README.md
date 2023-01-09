@@ -17,6 +17,7 @@ Start by clicking image below to get into flow script file:
 ```powershell
 
 $powershell-docs = Start-Process "https://go.azuredemos.net/docs-pwsh-home"
+$powershell-github = Start-Process "https://github.com/PowerShell/PowerShell.gi"
 $windows-terminal = Start-Process "https://go.azuredemos.net/docs-terminal-home"
 $windows-terminal-github-page = Start-Process "https://github.com/microsoft/terminal.git"
 $powershell-module-considerations = Start-Process "https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/performance/module-authoring-considerations?view=powershell-7.3"

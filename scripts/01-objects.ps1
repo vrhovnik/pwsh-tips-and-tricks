@@ -21,6 +21,20 @@ $data.Split("::")[1] | Set-Location
 $directories,$files = Get-ChildItem -Force -Recurse | Measure-Object -Sum PSIsContainer, Length -ErrorAction Ignore
 $directories,$files
 
+## read rss
+## snippet code from https://powershellisfun.com/
+Start-Process "https://azurecomcdn.azureedge.net/en-us/blog/feed/"
+$total = foreach ($item in Invoke-RestMethod -Uri "https://azurecomcdn.azureedge.net/en-us/blog/feed/" ) {
+    [PSCustomObject]@{
+        'Date published'   = $item.pubDate
+        Title              = $item.Title
+        Link               = $item.Link
+    }
+}
+
+$total | Sort-Object { $_."Date published" -as [datetime] } |  Select-Object -Last 10
+##Start-Process (.\ReadRss.ps1 | Where-Object {$_.Title -match "cost"} | Select-Object -ExpandProperty Link)
+
 #example with web pages links and images
 Invoke-WebRequest wttr.in
 # show ascii art as it should be in terminal

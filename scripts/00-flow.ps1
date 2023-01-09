@@ -4,7 +4,9 @@
 ## Providers
 ## Modules 
 ## Write your own cmdlets and scripts
-## random useful stuff
+## random (useful) stuff
+
+function global:prompt { Write-host ""; return 'MPGA> ' }
 
 # 0. Hello to all with version
 Write-Ascii "Welcome to PWSH tips and tricks"
@@ -15,6 +17,7 @@ Write-Ascii "Currently in PWSH $($PSVersionTable.PSVersion)"
 # if you wish to control Console as such, check out Console API here
 # https://learn.microsoft.com/en-us/windows/console/console-reference
 Start-Process "https://go.azuredemos.net/docs-pwsh-home"
+Start-Process "https://github.com/PowerShell/PowerShell.git"
 Start-Process "https://go.azuredemos.net/docs-terminal-home"
 Start-Process "https://github.com/microsoft/terminal.git"
 

@@ -9,3 +9,6 @@ Get-ChildItem .\ -Include bin,obj -Recurse | ForEach-Object { Remove-Item $_.Ful
 # custom formatting
 $fields = "Name",@{Label = "Length (MB)"; Expression = {$_.Length / 1mb}; Align = "Right"}
 Get-ChildItem "C:\Users\bovrhovn\OneDrive - Microsoft\Documents" -File | Format-Table $fields -Auto
+
+# customize Windows
+Start-Process "https://github.com/jaapbrasser/CustomizeWindows11/tree/main/public"
