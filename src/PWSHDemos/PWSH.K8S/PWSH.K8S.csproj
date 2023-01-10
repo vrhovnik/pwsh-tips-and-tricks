@@ -12,4 +12,8 @@
       <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="7.0.0-preview.2.22152.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="KProvider.cs" />
+    </ItemGroup>
+
 </Project>

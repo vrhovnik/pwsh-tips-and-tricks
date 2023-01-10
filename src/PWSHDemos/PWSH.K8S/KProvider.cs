@@ -1,13 +1,25 @@
-﻿using System.Diagnostics.Eventing.Reader;
+﻿using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using k8s;
 
 namespace PWSH.K8S;
 
-[CmdletProvider("KMan", ProviderCapabilities.None)]
+[CmdletProvider("KMan", ProviderCapabilities.ShouldProcess)]
 public class KProvider : ItemCmdletProvider
 {
+    protected override Collection<PSDriveInfo> InitializeDefaultDrives()
+    {
+        PSDriveInfo drive = new(
+            name: "KMan",
+            provider: ProviderInfo,
+            root: @"\",
+            "get namespaces and pods from current AKS cluster",
+            credential: null);
+        Collection<PSDriveInfo> drives = new() { drive };
+        return drives;
+    }
+    
     protected override PSDriveInfo NewDrive(PSDriveInfo drive)
     {
         if (drive == null)
@@ -18,8 +30,7 @@ public class KProvider : ItemCmdletProvider
         }
 
         // check if drive root is not null or empty
-        // and if its an existing file
-        if (string.IsNullOrEmpty(drive.Root) || (File.Exists(drive.Root) == false))
+        if (string.IsNullOrEmpty(drive.Root))
         {
             WriteError(new ErrorRecord(new ArgumentException("drive.Root"), "NoRoot",
                 ErrorCategory.InvalidArgument, drive));

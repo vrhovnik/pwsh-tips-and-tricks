@@ -1,6 +1,8 @@
 ﻿### PROVIDERS in POWERSHELL ###
+## Provider defines the logic that is used to access, navigate, and edit a data store, 
+## while a drive specifies a specific entry point to a data store
 
-# Get all providers
+# Get all providers registered on the system
 Get-PSProvider
 
 # Navigate environment variables
@@ -25,4 +27,12 @@ Set-Location $HOME
 New-PSDrive -PSProvider FileSystem -Name "WRK" -Root "C:\Work\" -Scope Global
 
 # built your own provider - check src folder
-Get-Content ".\src\PWSHDemos\PWSH.K8S\KProvider.cs"
+# check the code for the provider 
+# Get-Content ".\src\PWSHDemos\PWSH.K8S\KProvider.cs"
+Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\src\PWSHDemos\PWSH.K8S\bin\Debug\net7.0"
+Import-Module ".\PWSH.K8S.dll"
+Get-PSProvider
+
+# navigate to the provider and get child items as it would be a drive
+Set-Location K8D:
+Get-ChildItem
