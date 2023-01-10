@@ -13,10 +13,7 @@ public class K8Drive : NavigationCmdletProvider
         // Check if the path specified is a drive
         if (path.PathIsDrive(PSDriveInfo)) return true;
 
-        // chunk the path into parts
-        var pathChunks = path.ChunkPath(PSDriveInfo);
-
-        var type = GetNamesFromPath(path, out var namespaceName, out var podname);
+        var type = GetNamesFromPath(path, out var namespaceName, out _);
 
         if (type == PathTypes.Namespace)
         {
@@ -99,6 +96,7 @@ public class K8Drive : NavigationCmdletProvider
     protected override void GetItem(string path)
     {
         var kDriveInfo = PSDriveInfo as KDriveInfo;
+        WriteItemObject(path,path,true);
         if (path.PathIsDrive(PSDriveInfo))
         {
             var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
@@ -154,14 +152,17 @@ public class K8Drive : NavigationCmdletProvider
                 throw new ArgumentException("Data was not read clearly");
         } // else
     } // GetChildItems
-
-    /// <summary>
-    /// Return the names of all child items.
-    /// </summary>
-    /// <param name="path">The root path.</param>
-    /// <param name="returnContainers">Not used.</param>
-    protected override void GetChildNames(string path,
-        ReturnContainers returnContainers)
+    
+    protected override string GetParentPath(string path, string root)
+    {
+        if (string.IsNullOrEmpty(root))
+            return path.Substring(0,
+                path.LastIndexOf(KProviderHelpers.PathSeparator, StringComparison.OrdinalIgnoreCase));
+        
+        return !path.Contains(root) ? null : path.Substring(0, path.LastIndexOf(KProviderHelpers.PathSeparator, StringComparison.OrdinalIgnoreCase));
+    }
+    
+    protected override void GetChildNames(string path, ReturnContainers returnContainers)
     {
         // If the path represented is a drive, then the child items are
         // namespaces
@@ -217,7 +218,7 @@ public class K8Drive : NavigationCmdletProvider
     private PathTypes GetNamesFromPath(string path, out string namespaceName, out string podName)
     {
         var retVal = PathTypes.Invalid;
-        namespaceName = "portainer";
+        namespaceName = "default";
         podName = string.Empty;
 
         // Check if the path specified is a drive

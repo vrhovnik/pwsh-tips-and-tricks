@@ -35,4 +35,8 @@ Get-PSProvider
 
 # navigate to the provider and get child items as it would be a drive
 Set-Location K8D:
+# get all namespaces
+Get-ChildItem
+Set-Location "portainer"
+# get all pods
 Get-ChildItem
