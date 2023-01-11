@@ -44,7 +44,7 @@ public class K8Drive : NavigationCmdletProvider
         PSDriveInfo drive = new(
             name: "K8D",
             provider: ProviderInfo,
-            root: @"\",
+            root: @"K8D:",
             "get namespaces and pods from current AKS cluster",
             credential: null);
         Collection<PSDriveInfo> drives = new() { drive };
@@ -75,28 +75,12 @@ public class K8Drive : NavigationCmdletProvider
         return kubernetesPsDrive;
     } // NewDrive
 
-    protected override bool IsValidPath(string path)
-    {
-        var result = !string.IsNullOrEmpty(path);
-
-        // convert all separators in the path to a uniform one
-        path = path.NormalizePath();
-
-        // split the path into individual chunks
-        var pathChunks = path.Split(KProviderHelpers.PathSeparator.ToCharArray());
-
-        foreach (var pathChunk in pathChunks)
-        {
-            if (pathChunk.Length == 0) result = false;
-        }
-
-        return result;
-    }
+    protected override bool IsValidPath(string path) => 
+        !string.IsNullOrEmpty(path);
 
     protected override void GetItem(string path)
     {
         var kDriveInfo = PSDriveInfo as KDriveInfo;
-        WriteItemObject(path,path,true);
         if (path.PathIsDrive(PSDriveInfo))
         {
             var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
@@ -132,7 +116,7 @@ public class K8Drive : NavigationCmdletProvider
             var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
             var namespacesNames = namespaceList.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
             WriteItemObject(namespacesNames, path, true);
-        } // if (PathIsDrive...
+        } 
         else
         {
             var type = GetNamesFromPath(path, out var namespaceName, out var podName);
@@ -150,7 +134,7 @@ public class K8Drive : NavigationCmdletProvider
             }
             else
                 throw new ArgumentException("Data was not read clearly");
-        } // else
+        } 
     } // GetChildItems
     
     protected override string GetParentPath(string path, string root)
