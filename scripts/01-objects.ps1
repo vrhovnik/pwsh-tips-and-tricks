@@ -35,6 +35,20 @@ $total = foreach ($item in Invoke-RestMethod -Uri "https://azurecomcdn.azureedge
 $total | Sort-Object { $_."Date published" -as [datetime] } |  Select-Object -Last 10
 ##Start-Process (.\ReadRss.ps1 | Where-Object {$_.Title -match "cost"} | Select-Object -ExpandProperty Link)
 
+# work with json - very easy to work with and really powerfull
+Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\files"
+$json = Get-Content appsettings.json | ConvertFrom-Json
+Write-Output $json
+# get azure domain value
+$json.AzureAd.Domain
+# change azure domain value to microsoft.onmicrosoft.com
+$json.AzureAd.Domain = "microsoft.onmicrosoft.com"
+# write back to file
+$json | ConvertTo-Json | Set-Content appsettings.json
+#read new values
+$json = Get-Content appsettings.json | ConvertFrom-Json
+$json.AzureAd.Domain
+
 #example with web pages links and images
 Invoke-WebRequest wttr.in
 # show ascii art as it should be in terminal
@@ -56,4 +70,5 @@ $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $speak.Speak("Öbjects and .NET rules")
 
 # example native windows commands - Win 32 API
+Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\scripts"
 & ".\01-objects-MaximizeWindow.ps1"
