@@ -17,12 +17,12 @@ public class K8Drive : NavigationCmdletProvider
 
         if (type == PathTypes.Namespace)
         {
-            var namespaceList = (PSDriveInfo as KDriveInfo).KubernetesInstance.CoreV1.ListNamespace();
-            return namespaceList.Items.Any(namespaceListItem => namespaceListItem.Metadata.Name == namespaceName);
+            var namespaceList = (PSDriveInfo as KDriveInfo)?.KubernetesInstance.CoreV1.ListNamespace();
+            return namespaceList != null && namespaceList.Items.Any(namespaceListItem => namespaceListItem.Metadata.Name == namespaceName);
         }
 
         return false;
-    } // IsItemContainer
+    } 
 
     protected override string GetChildName(string path)
     {
@@ -57,7 +57,7 @@ public class K8Drive : NavigationCmdletProvider
         {
             WriteError(new ErrorRecord(new ArgumentNullException(nameof(drive)),
                 "NullDrive", ErrorCategory.InvalidArgument, null));
-            return null;
+            throw new ArgumentNullException(nameof(drive));
         }
 
         // check if drive root is not null or empty
@@ -65,15 +65,10 @@ public class K8Drive : NavigationCmdletProvider
         {
             WriteError(new ErrorRecord(new ArgumentException("drive.Root"), "NoRoot",
                 ErrorCategory.InvalidArgument, drive));
-            return null;
+            throw new ArgumentNullException(nameof(drive));
         }
-
-        // create a new drive and create connection to kubernetes cluster
-        var kubernetesPsDrive = new KDriveInfo(drive);
-        var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
-        kubernetesPsDrive.KubernetesInstance = new Kubernetes(config);
-        return kubernetesPsDrive;
-    } // NewDrive
+        return new KDriveInfo(drive);
+    } 
 
     protected override bool IsValidPath(string path) => 
         !string.IsNullOrEmpty(path);
@@ -83,8 +78,8 @@ public class K8Drive : NavigationCmdletProvider
         var kDriveInfo = PSDriveInfo as KDriveInfo;
         if (path.PathIsDrive(PSDriveInfo))
         {
-            var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
-            var namespacesNames = namespaceList.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
+            var namespaceList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespace();
+            var namespacesNames = namespaceList?.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
             WriteItemObject(namespacesNames, path, true);
             return;
         } // if (PathIsDrive...
@@ -93,14 +88,14 @@ public class K8Drive : NavigationCmdletProvider
 
         if (type == PathTypes.Namespace)
         {
-            var podList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
-            var podNames = podList.Items.Select(currentPod => currentPod.Metadata.Name);
+            var podList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
+            var podNames = podList?.Items.Select(currentPod => currentPod.Metadata.Name);
             WriteItemObject(podNames, path + KProviderHelpers.PathSeparator, true);
         }
         else if (type == PathTypes.Pod)
         {
-            var podList = kDriveInfo.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
-            WriteItemObject(podList.Spec, path + KProviderHelpers.PathSeparator + podName, false);
+            var podList = kDriveInfo?.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
+            WriteItemObject(podList?.Spec, path + KProviderHelpers.PathSeparator + podName, false);
         }
         else
             throw new ArgumentException("Data was not read clearly");
@@ -113,8 +108,8 @@ public class K8Drive : NavigationCmdletProvider
         var kDriveInfo = PSDriveInfo as KDriveInfo;
         if (path.PathIsDrive(PSDriveInfo))
         {
-            var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
-            var namespacesNames = namespaceList.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
+            var namespaceList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespace();
+            var namespacesNames = namespaceList?.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
             WriteItemObject(namespacesNames, path, true);
         } 
         else
@@ -123,14 +118,14 @@ public class K8Drive : NavigationCmdletProvider
 
             if (type == PathTypes.Namespace)
             {
-                var podList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
-                var podNames = podList.Items.Select(currentPod => currentPod.Metadata.Name);
+                var podList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
+                var podNames = podList?.Items.Select(currentPod => currentPod.Metadata.Name);
                 WriteItemObject(podNames, path + KProviderHelpers.PathSeparator, true);
             }
             else if (type == PathTypes.Pod)
             {
-                var podList = kDriveInfo.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
-                WriteItemObject(podList.Spec, path + KProviderHelpers.PathSeparator + podName, false);
+                var podList = kDriveInfo?.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
+                WriteItemObject(podList?.Spec, path + KProviderHelpers.PathSeparator + podName, false);
             }
             else
                 throw new ArgumentException("Data was not read clearly");
@@ -143,7 +138,8 @@ public class K8Drive : NavigationCmdletProvider
             return path.Substring(0,
                 path.LastIndexOf(KProviderHelpers.PathSeparator, StringComparison.OrdinalIgnoreCase));
         
-        return !path.Contains(root) ? null : path.Substring(0, path.LastIndexOf(KProviderHelpers.PathSeparator, StringComparison.OrdinalIgnoreCase));
+        return (!path.Contains(root) ? null : path.Substring(0, path.LastIndexOf(KProviderHelpers.PathSeparator, StringComparison.OrdinalIgnoreCase))) 
+               ?? string.Empty;
     }
     
     protected override void GetChildNames(string path, ReturnContainers returnContainers)
@@ -153,8 +149,8 @@ public class K8Drive : NavigationCmdletProvider
         var kDriveInfo = PSDriveInfo as KDriveInfo;
         if (path.PathIsDrive(PSDriveInfo))
         {
-            var namespaceList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespace();
-            var namespacesNames = namespaceList.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
+            var namespaceList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespace();
+            var namespacesNames = namespaceList?.Items.Select(currentNamespace => currentNamespace.Metadata.Name);
             WriteItemObject(namespacesNames, path, true);
         } // if (PathIsDrive...
         else
@@ -163,14 +159,14 @@ public class K8Drive : NavigationCmdletProvider
 
             if (type == PathTypes.Namespace)
             {
-                var podList = kDriveInfo.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
-                var podNames = podList.Items.Select(currentPod => currentPod.Metadata.Name);
+                var podList = kDriveInfo?.KubernetesInstance.CoreV1.ListNamespacedPod(namespaceName);
+                var podNames = podList?.Items.Select(currentPod => currentPod.Metadata.Name);
                 WriteItemObject(podNames, path, true);
             }
             else if (type == PathTypes.Pod)
             {
-                var podList = kDriveInfo.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
-                WriteItemObject(podList.Spec, path, false);
+                var podList = kDriveInfo?.KubernetesInstance.CoreV1.ReadNamespacedPod(podName, namespaceName);
+                WriteItemObject(podList?.Spec, path, false);
             }
             else
                 throw new ArgumentException("Data was not read clearly");

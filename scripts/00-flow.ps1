@@ -1,14 +1,12 @@
 ﻿# Flow for the demos
-## Objects
-## Profiles & Aliases
-## Providers
-## Modules 
-## Write your own cmdlets and scripts
-## random (useful) stuff
+## 1. Objects
+## 2. Profiles & Aliases
+## 3. Providers and write your own
+## 4. Modules and Write your own cmdlets and scripts
+## 5. random (useful) stuff
+function global:prompt { Write-host ""; return 'MPGA (CSA)> ' }
 
-function global:prompt { Write-host ""; return 'MPGA> ' }
-
-# 0. Hello to all with version
+# 0. Hello to all with ASCII version
 Write-Ascii "Welcome to PWSH tips and tricks"
 Write-Ascii "Currently in PWSH $($PSVersionTable.PSVersion)"
 

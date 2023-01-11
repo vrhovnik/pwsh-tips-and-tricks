@@ -2,6 +2,12 @@
 
 namespace PWSH.K8S;
 
+/// <summary>
+/// helper functions to get the path right
+/// </summary>
+/// <remarks>
+///     check out documentation here <see cref="https://learn.microsoft.com/en-us/powershell/scripting/developer/provider/writing-a-navigation-provider?view=powershell-7.3"/>
+/// </remarks>
 public static class KProviderHelpers
 {
     public const string PathSeparator = "\\";
@@ -13,14 +19,13 @@ public static class KProviderHelpers
     /// <returns>
     /// True if the path given represents a drive, false otherwise.
     /// </returns>
-    public static bool PathIsDrive(this string path, PSDriveInfo psDriveInfo)
-    {
-        // Remove the drive name and first path separator.  If the 
-        // path is reduced to nothing, it is a drive. Also if its
-        // just a drive then there wont be any path separators
-        return string.IsNullOrEmpty(path.Replace(psDriveInfo.Root, "")) ||
-               string.IsNullOrEmpty(path.Replace(psDriveInfo.Root + PathSeparator, ""));
-    } // PathIsDrive
+    /// <remarks>
+    /// Remove the drive name and first path separator.  If the path is reduced to nothing, it is a drive.
+    /// Also if its just a drive then there wont be any path separators
+    /// </remarks>
+    public static bool PathIsDrive(this string path, PSDriveInfo psDriveInfo) =>
+        string.IsNullOrEmpty(path.Replace(psDriveInfo.Root, "")) ||
+        string.IsNullOrEmpty(path.Replace(psDriveInfo.Root + PathSeparator, ""));  // PathIsDrive
 
     /// <summary>
     /// Breaks up the path into individual elements.
@@ -29,10 +34,7 @@ public static class KProviderHelpers
     /// <returns>An array of path segments.</returns>
     public static string[] ChunkPath(this string path, PSDriveInfo psDriveInfo)
     {
-        // Normalize the path before splitting
-        var normalPath = NormalizePath(path);
-        // Return the path with the drive name and first path 
-        // separator character removed, split by the path separator.
+        var normalPath = NormalizePath(path); //normalize path to remove chars
         var pathNoDrive = normalPath.Replace(psDriveInfo.Root + PathSeparator, "");
         return pathNoDrive.Split(PathSeparator.ToCharArray());
     } // ChunkPath
