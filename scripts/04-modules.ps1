@@ -1,6 +1,18 @@
 ﻿### Modules in POWERSHELL ###
 $env:PSModulePath -split ';'
 
+# PowerShell utility modules
+Start-Process "https://learn.microsoft.com/en-us/powershell/utility-modules/overview?view=ps-modules"
+Install-Module Microsoft.PowerShell.Crescendo -Force
+# Example with an existing application - mstsc - remote computer
+# inspired by blog post https://tommymaynard.com/simple-simple-microsoft-crescendo-example/
+Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\files"
+Export-CrescendoModule -ConfigurationFile Remote.json -ModuleName Remote.psm1
+Import-Module -Name .\Remote.psm1
+Get-Command -Module Remote
+Get-Alias ccc
+ccc
+
 # add module from gallery
 # https://github.com/dfinke/PowerShellHumanizer
 # https://humanizr.net/
@@ -28,3 +40,5 @@ Get-NsPods -NamespaceName "portainer"
 
 # get me only containers with name and other information
 Get-NsPods -NamespaceName portainer | Select-Object -ExpandProperty Spec | Select-Object -ExpandProperty Containers
+
+

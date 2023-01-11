@@ -1,0 +1,26 @@
+{
+  "Commands": [
+    {
+      "Verb": "Connect",
+      "Noun": "RemoteComputer",
+      "OriginalName": "C:\\WINDOWS/System32/mstsc.exe",
+      "OriginalCommandElements": [
+                "-v"               
+            ],
+      "Platform": [
+        "Windows"       
+      ],
+      "Aliases": [
+                "ccc"],
+      "Description": "Connect to remote machine",
+      "OutputHandlers": [
+                {
+                    "ParameterSetName": "Default",
+                    "HandlerType": "Inline",
+                    "Handler": "$args[0]"
+                }
+            ]
+    }
+  ],
+  "$schema": "https://aka.ms/PowerShell/Crescendo/Schemas/2021-11"
+}
