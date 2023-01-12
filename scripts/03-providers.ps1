@@ -30,7 +30,7 @@ New-PSDrive -PSProvider FileSystem -Name "WRK" -Root "C:\Work\" -Scope Global
 # check the code for the provider 
 # Get-Content ".\src\PWSHDemos\PWSH.K8S\KProvider.cs"
 Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\src\PWSHDemos\PWSH.K8S\bin\Debug\net7.0"
-Import-Module ".\PWSH.K8S.dll"
+Import-Module ".\PWSH.K8S.dll" -Force
 Get-PSProvider
 
 # navigate to the provider and get child items as it would be a drive

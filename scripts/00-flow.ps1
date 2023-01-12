@@ -8,7 +8,7 @@ function global:prompt { Write-host ""; return 'MPGA (CSA)> ' }
 
 # 0. Hello to all with ASCII version
 Write-Ascii "Welcome to PWSH tips and tricks"
-Write-Ascii "Currently in PWSH $($PSVersionTable.PSVersion)"
+Write-Ascii "PWSH $($PSVersionTable.PSVersion)"
 
 # 1. Introduction PWSH home and keeping up with latest and greatest
 # why / what / install PWSH and Windows Terminal

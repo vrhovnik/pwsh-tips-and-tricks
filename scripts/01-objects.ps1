@@ -1,10 +1,9 @@
 ﻿### classic object work with PWSH ####
 Set-Location "$home\Downloads"
-Get-ChildItem | Get-Member | Select-Object TypeName -Unique
 # create some dummy data
 1..10 | ForEach-Object { New-Item -Type File "file$_.pwshrules" }
-# create same ammount of other files
-1..(Get-ChildItem | Measure-Object | Select-Object -ExpandProperty Count) | ForEach-Object { New-Item -Type File "file$_.pwshrules2" }
+# get objects properties and methods
+Get-ChildItem | Get-Member | Select-Object TypeName -Unique
 # get more information and traverse through the objects
 Get-ChildItem | Format-List -Property * # it gets all of the properties
 Get-ChildItem | Get-Member
@@ -15,6 +14,9 @@ $data.Split("::")
 $data.Split("::")[1]
 $home
 $data.Split("::")[1] | Set-Location
+
+# create same ammount of other files
+1..(Get-ChildItem | Measure-Object | Select-Object -ExpandProperty Count) | ForEach-Object { New-Item -Type File "file$_.pwshrules2" }
 
 # multiple variables - how to get multiple values from directory
 # get folder numbers, get all of the files and lentgth of all files all together
@@ -33,7 +35,23 @@ $total = foreach ($item in Invoke-RestMethod -Uri "https://azurecomcdn.azureedge
 }
 
 $total | Sort-Object { $_."Date published" -as [datetime] } |  Select-Object -Last 10
-##Start-Process (.\ReadRss.ps1 | Where-Object {$_.Title -match "cost"} | Select-Object -ExpandProperty Link)
+$total | Where-Object { $_.Title -like "*cost*" } | Select-Object -ExpandProperty Link -First 1 
+Start-Process ($total | Where-Object { $_.Title -like "*cost*" } | Select-Object -ExpandProperty Link -First 1)
+
+#example with web pages links and images
+Invoke-WebRequest wttr.in
+# show ascii art as it should be in terminal
+Invoke-WebRequest wttr.in | Select-Object -ExpandProperty Content
+Invoke-WebRequest cheat.sh/powershell | Select-Object -ExpandProperty Content
+
+Start-Process "https://go.azuredemos.net/caf-tools"
+Invoke-WebRequest -Uri "https://go.azuredemos.net/caf-tools" -OutVariable site
+$site.Links | ForEach-Object {$_."data-linktype"}
+$site.Links | Select-Object -ExpandProperty outerHTML | Select-String "data-linktype=\""external\""" | ForEach-Object {$_ -replace '.*href="(.*?)".*','$1'}
+
+Invoke-WebRequest -Uri "https://www.bing.com/images/search?q=powershell" -OutVariable site
+$site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line
+Start-Process -Path ($site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line)
 
 # work with json - very easy to work with and really powerfull
 Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\files"
@@ -48,21 +66,6 @@ $json | ConvertTo-Json | Set-Content appsettings.json
 #read new values
 $json = Get-Content appsettings.json | ConvertFrom-Json
 $json.AzureAd.Domain
-
-#example with web pages links and images
-Invoke-WebRequest wttr.in
-# show ascii art as it should be in terminal
-Invoke-WebRequest wttr.in | Select-Object -ExpandProperty Content
-Invoke-WebRequest cheat.sh/pwsh | Select-Object -ExpandProperty Content
-
-Start-Process "https://go.azuredemos.net/caf-tools"
-Invoke-WebRequest -Uri "https://go.azuredemos.net/caf" -OutVariable site
-$site.Links | ForEach-Object {$_."data-linktype"}
-$site.Links | Select-Object -ExpandProperty outerHTML | Select-String "data-linktype=\""external\""" | ForEach-Object {$_ -replace '.*href="(.*?)".*','$1'}
-
-Invoke-WebRequest -Uri "https://www.bing.com/images/search?q=powershell" -OutVariable site
-$site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line
-Start-Process -Path ($site.Images | ForEach-Object {$_.src2} | Select-String hero | Select-Object -First 1 -ExpandProperty Line)
 
 # example with speech object
 Add-Type -AssemblyName System.speech
