@@ -34,7 +34,7 @@ in [src folder](./src/PWSHDemos) before you can use it in PowerShell session. To
 
 ```powershell
 
-Set-Location "src/PWSHDemos"
+Set-Location "src/PWSHDemos/PWSH.K8S"
 dotnet build "PWSH.K8S.csproj"
 
 ```
