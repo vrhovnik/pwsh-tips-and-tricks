@@ -2,7 +2,9 @@
 Set-Location "$home\Downloads"
 # create some dummy data
 1..10 | ForEach-Object { New-Item -Type File "file$_.pwshrules" }
-# get objects properties and methods
+# get properties of the cmdlets
+# Get-Command, Get-Member, Get-Help -Detailed Get-ChildItem
+# get return .NET objects properties and methods
 Get-ChildItem | Get-Member | Select-Object TypeName -Unique
 # get more information and traverse through the objects
 Get-ChildItem | Format-List -Property * # it gets all of the properties
@@ -20,6 +22,7 @@ $data.Split("::")[1] | Set-Location
 
 # multiple variables - how to get multiple values from directory
 # get folder numbers, get all of the files and lentgth of all files all together
+# Really good video about using this is debugging option https://www.youtube.com/watch?v=tz0pcE1e2us&t=738s
 $directories,$files = Get-ChildItem -Force -Recurse | Measure-Object -Sum PSIsContainer, Length -ErrorAction Ignore
 $directories,$files
 
