@@ -1,4 +1,5 @@
-﻿# PowerShell is a cross-platform task automation solution made up of a command-line shell, 
+﻿# PowerShell is a cross-platform task automation solution made up 
+# of a command-line shell, 
 # a scripting language, and a configuration management framework. 
 # PowerShell runs on Windows, Linux, and macOS
 Start-Process "https://go.azuredemos.net/docs-pwsh-home"
@@ -21,6 +22,7 @@ Start-Process "https://github.com/microsoft/terminal.git"
 function global:prompt { Write-host ""; return 'MPGA (CSA)> ' }
 
 # 0. Hello to all with ASCII version
+# Install-Module -Name WriteAscii -Force
 Write-Ascii "Welcome to PWSH tips and tricks"
 Write-Ascii "PWSH $($PSVersionTable.PSVersion)"
 

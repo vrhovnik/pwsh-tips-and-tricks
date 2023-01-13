@@ -9,7 +9,6 @@ Get-ChildItem | Get-Member | Select-Object TypeName -Unique
 # get more information and traverse through the objects
 Get-ChildItem | Format-List -Property * # it gets all of the properties
 Get-ChildItem | Get-Member
-Get-ChildItem | Select-Object -ExpandProperty PsParentPath -Unique | Get-Member
 Get-ChildItem | Select-Object -ExpandProperty PsParentPath -Unique -OutVariable data | Get-Member
 $data | Get-Member
 $data.Split("::")
