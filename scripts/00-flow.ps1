@@ -30,10 +30,8 @@ Get-WhatsNew
 Get-WhatsNew | Select-String security
 Get-WhatsNew -Online
 
-# 2. What is PWSH and difference between other shells
-# PowerShell is a modern command shell that includes the best features of other popular shells. 
-# Unlike most shells that only accept and return text, PowerShell accepts and returns .NET objects.
-# PowerShell is built on the .NET Framework, so you can use all the .NET Framework cmdlets and providers.
+# 2. PowerShell is built on the .NET Framework, 
+#    so you can use all the .NET Framework cmdlets and providers.
 code "01-objects.ps1"
 
 # 3.profiles and aliases

@@ -1,0 +1,8 @@
+{  
+  "Microsoft.PowerShell:ExecutionPolicy": "RemoteSigned",
+  "ExperimentalFeatures": [
+    "PSCustomTableHeaderLabelDecoration",
+    "PSUseAbbreviationExpansion"
+  ]
+}
+

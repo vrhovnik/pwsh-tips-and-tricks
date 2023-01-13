@@ -29,9 +29,14 @@ Install-Module -Name PowerShellHumanizer -Force
 "great_king" | ConvertTo-Plural
 "mr_chatgp_the_ai" | ConvertTo-HyphenatedString
 
+# framework for building PowerShell modules and additional utils
 Start-Process "https://psframework.org/"
 Install-Module -Name PSUtil -Force
 1..3 | format "192.168.2.{0}"
+
+# image manipulation library
+Start-Process "https://github.com/EvotecIT/ImagePlayground"
+New-ImageQRCode -Content 'https://go.azuredemos.net/mpga-home' -FilePath "$home\Downloads\link-to-home-qr.png"
 
 # custom module import and work with it
 Set-Location "C:\Work\Projects\pwsh-tips-and-tricks\src\PWSHDemos\PWSH.K8S\bin\Debug\net7.0"
